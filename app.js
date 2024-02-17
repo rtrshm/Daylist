@@ -148,7 +148,7 @@ let fetchSpotifyDaylist = async () => {
 
     let { status, data } = await axios(getPlaylistsOptions)
     let spotify_daylist = data.items.find(item =>
-        item.name.startsWith('daylist •')
+        item.name.startsWith('daylist •') && item.owner.id == "spotify"
     )
     return spotify_daylist
 }
