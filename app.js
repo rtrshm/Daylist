@@ -43,20 +43,21 @@ app.get('/login', (req, res) => {
         client_id: client_id,
         scope: scope,
         redirect_uri: redirect_uri,
-        state:state
+        state: state
     })
 
-    res.redirect('https://accounts.spotify.com/authorize?' + authQueryParams.toString())
+    res.redirect(
+        'https://accounts.spotify.com/authorize?' + authQueryParams.toString()
+    )
 })
 
 app.get('/spotifycallback', async (req, res) => {
-
     var code = req.query.code || null
     var state = req.query.state || null
     var storedState = req.cookies ? req.cookies[stateKey] : null
 
     if (state === null || state !== storedState) {
-        console.log(`${timestamp()} State mismatch.`);
+        console.log(`${timestamp()} State mismatch.`)
         res.status(400)
         res.send()
     } else {
@@ -81,8 +82,7 @@ app.get('/spotifycallback', async (req, res) => {
         }
 
         try {
-
-            let {status, data} = await axios(authOptions);
+            let { status, data } = await axios(authOptions)
 
             access_token = data.access_token
             refresh_token = data.refresh_token
@@ -95,7 +95,7 @@ app.get('/spotifycallback', async (req, res) => {
             res.status(200)
             res.send()
         } catch (error) {
-            console.log(error);
+            console.log(error)
             console.log(`${timestamp()} Invalid token.`)
             res.status(400)
             res.send()
@@ -124,7 +124,7 @@ let refreshToken = async () => {
     }
 
     let { status, data } = await axios(refreshTokenOptions)
-    
+
     access_token = data.access_token
     defaultHeaders['Authorization'] = `Bearer ${access_token}`
     console.log(`${timestamp()} Token refreshed.`)
@@ -224,7 +224,7 @@ const startTask = () => {
     setInterval(async () => {
         await refreshToken()
         await fetchAndUpdateDaylist()
-    }, 30 * 60 * 1000)
+    }, 15 * 60 * 1000)
 }
 
 const startServer = async () => {
@@ -237,7 +237,6 @@ const startServer = async () => {
     console.log(`Authorized!`)
     startTask()
 }
-
 
 app.listen(6969, () => {
     console.log(`Listening on 6969...`)
