@@ -1,14 +1,4 @@
-/**
- * This is an example of a basic node.js script that performs
- * the Authorization Code oAuth2 flow to authenticate against
- * the Spotify Accounts.
- *
- * For more information, read
- * https://developer.spotify.com/documentation/web-api/tutorials/code-flow
- */
-
 var express = require('express')
-var request = require('request')
 var axios = require('axios')
 var crypto = require('crypto')
 var cors = require('cors')
@@ -37,11 +27,10 @@ app.use(express.static(__dirname + '/public'))
     .use(cors())
     .use(cookieParser())
 
-app.get('/login', function (req, res) {
+app.get('/login', (req, res) => {
     var state = generateRandomString(16)
     res.cookie(stateKey, state)
 
-    // your application requests authorization
     var scope =
         'user-read-private\
   user-read-email\
@@ -49,38 +38,33 @@ app.get('/login', function (req, res) {
   playlist-modify-public\
   playlist-modify-private'
 
-    res.redirect(
-        'https://accounts.spotify.com/authorize?' +
-            querystring.stringify({
-                response_type: 'code',
-                client_id: client_id,
-                scope: scope,
-                redirect_uri: redirect_uri,
-                state: state
-            })
-    )
+    const authQueryParams = new URLSearchParams({
+        response_type: 'code',
+        client_id: client_id,
+        scope: scope,
+        redirect_uri: redirect_uri,
+        state:state
+    })
+
+    res.redirect('https://accounts.spotify.com/authorize?' + authQueryParams.toString())
 })
 
-app.get('/spotifycallback', function (req, res) {
-    // your application requests refresh and access tokens
-    // after checking the state parameter
+app.get('/spotifycallback', async (req, res) => {
 
     var code = req.query.code || null
     var state = req.query.state || null
     var storedState = req.cookies ? req.cookies[stateKey] : null
 
     if (state === null || state !== storedState) {
-        res.redirect(
-            '/#' +
-                querystring.stringify({
-                    error: 'state_mismatch'
-                })
-        )
+        console.log(`${timestamp()} State mismatch.`);
+        res.status(400)
+        res.send()
     } else {
         res.clearCookie(stateKey)
         var authOptions = {
+            method: 'POST',
             url: 'https://accounts.spotify.com/api/token',
-            form: {
+            data: {
                 code: code,
                 redirect_uri: redirect_uri,
                 grant_type: 'authorization_code'
@@ -96,28 +80,30 @@ app.get('/spotifycallback', function (req, res) {
             json: true
         }
 
-        request.post(authOptions, function (error, response, body) {
-            if (!error && response.statusCode === 200) {
-                access_token = body.access_token
-                refresh_token = body.refresh_token
+        try {
 
-                defaultHeaders = {
-                    'content-type': 'application/x-www-form-urlencoded',
-                    Authorization: `Bearer ${access_token}`
-                }
+            let {status, data} = await axios(authOptions);
 
-                res.status(200)
-                res.send()
-            } else {
-                console.log(`${timestamp()} Invalid token.`)
-                res.status(400)
-                res.send()
+            access_token = data.access_token
+            refresh_token = data.refresh_token
+
+            defaultHeaders = {
+                'content-type': 'application/x-www-form-urlencoded',
+                Authorization: `Bearer ${access_token}`
             }
-        })
+
+            res.status(200)
+            res.send()
+        } catch (error) {
+            console.log(error);
+            console.log(`${timestamp()} Invalid token.`)
+            res.status(400)
+            res.send()
+        }
     }
 })
 
-let refreshToken = async callback => {
+let refreshToken = async () => {
     console.log(`${timestamp()} Refreshing token...`)
     const refreshTokenOptions = {
         method: 'POST',
@@ -138,8 +124,8 @@ let refreshToken = async callback => {
     }
 
     let { status, data } = await axios(refreshTokenOptions)
+    
     access_token = data.access_token
-    refresh_token = data.refresh_token
     defaultHeaders['Authorization'] = `Bearer ${access_token}`
     console.log(`${timestamp()} Token refreshed.`)
 }
@@ -251,6 +237,7 @@ const startServer = async () => {
     console.log(`Authorized!`)
     startTask()
 }
+
 
 app.listen(6969, () => {
     console.log(`Listening on 6969...`)
