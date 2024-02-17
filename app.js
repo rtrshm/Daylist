@@ -118,7 +118,7 @@ app.get('/spotifycallback', function (req, res) {
 })
 
 let refreshToken = async callback => {
-    console.log(`${timestamp()} Refreshing token...`);
+    console.log(`${timestamp()} Refreshing token...`)
     const refreshTokenOptions = {
         method: 'POST',
         url: 'https://accounts.spotify.com/api/token',
@@ -236,7 +236,7 @@ let fetchAndUpdateDaylist = async () => {
 const startTask = () => {
     fetchAndUpdateDaylist()
     setInterval(async () => {
-        await refresthToken()
+        await refreshToken()
         await fetchAndUpdateDaylist()
     }, 30 * 60 * 1000)
 }
