@@ -8,7 +8,7 @@ require('dotenv').config()
 
 var client_id = process.env.SPOTIFY_CLIENT_ID // your clientId
 var client_secret = process.env.SPOTIFY_CLIENT_SECRET // Your secret
-var redirect_uri = 'http://localhost:6969/spotifycallback' // Your redirect uri
+var redirect_uri = 'http://10.0.111.98:6969/spotifycallback' // Your redirect uri
 var my_playlist_id = '4KjEeQ2TWzJuPsvnRUsFHK'
 var access_token, refresh_token
 var defaultHeaders = { 'content-type': 'application/x-www-form-urlencoded' }
@@ -246,7 +246,7 @@ const startTask = () => {
 
 const startServer = async () => {
     console.log(
-        `Authorize the server by going to http://localhost:6969/login...`
+        `Authorize the server by going to http://10.0.111.98:6969/login...`
     )
     while (access_token === undefined) {
         await new Promise(r => setTimeout(r, 5000))
