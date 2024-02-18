@@ -147,9 +147,26 @@ let fetchSpotifyDaylist = async () => {
     }
 
     let { status, data } = await axios(getPlaylistsOptions)
-    let spotify_daylist = data.items.find(item =>
-        item.name.startsWith('daylist •') && item.owner.id == "spotify"
+    let spotify_daylist = data.items.find(
+        item => (item.name.startsWith('daylist •') || item.name === "daylist") && item.owner.id == 'spotify'
     )
+
+    while (spotify_daylist.name === "daylist") {
+
+        console.log(`${timestamp()} Need to poke daylist, querying...`)
+
+        await new Promise(r => setTimeout(r, 5000))
+
+        const queryPlaylistToRefresh = {
+            method: 'GET',
+            url: spotify_daylist.href
+            headers: defaultHeaders,
+            json: true
+        }
+
+        spotify_daylist = await axios(queryPlaylistToRefresh)
+    }
+
     return spotify_daylist
 }
 
