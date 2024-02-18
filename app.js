@@ -159,7 +159,7 @@ let fetchSpotifyDaylist = async () => {
 
         const queryPlaylistToRefresh = {
             method: 'GET',
-            url: spotify_daylist.href
+            url: spotify_daylist.href,
             headers: defaultHeaders,
             json: true
         }
