@@ -238,7 +238,7 @@ let fetchAndUpdateDaylist = async () => {
         throw "Failed to fetch daylist songs";
     }
     await updateDaylistSongs(spotify_daylist_songs);
-    await updateDaylistName(spotify_daylist.name);
+    await updateDaylistName("🤖 " + spotify_daylist.name);
     console.log(`${timestamp()} Successfully updated daylist.`);
 };
 
