@@ -152,11 +152,7 @@ let fetchSpotifyDaylist = async () => {
             item.owner.id == "spotify"
     );
 
-    while (spotify_daylist.name === "daylist") {
-        console.log(`${timestamp()} Need to poke daylist, querying...`);
-
-        await new Promise((r) => setTimeout(r, 5000));
-
+    if (spotify_daylist.name === "daylist") {
         const queryPlaylistToRefresh = {
             method: "GET",
             url: spotify_daylist.href,
@@ -164,7 +160,15 @@ let fetchSpotifyDaylist = async () => {
             json: true,
         };
 
-        spotify_daylist = await axios(queryPlaylistToRefresh);
+        ({ spotify_daylist } = await axios(queryPlaylistToRefresh));
+
+        while (spotify_daylist.tracks === undefined) {
+            console.log(
+                `${timestamp()} Need to poke daylist to force update, querying...`
+            );
+
+            ({ spotify_daylist } = await axios(queryPlaylistToRefresh));
+        }
     }
 
     return spotify_daylist;
@@ -236,7 +240,7 @@ let fetchAndUpdateDaylist = async () => {
     console.log(`${timestamp()} Successfully updated daylist.`);
 };
 
-const startTask = () => {
+let startTask = () => {
     fetchAndUpdateDaylist();
     setInterval(async () => {
         await refreshToken();
@@ -244,7 +248,7 @@ const startTask = () => {
     }, 15 * 60 * 1000);
 };
 
-const startServer = async () => {
+let startServer = async () => {
     console.log(
         `Authorize the server by going to http://10.0.111.98:6969/login...`
     );
