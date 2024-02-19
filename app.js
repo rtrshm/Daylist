@@ -160,14 +160,16 @@ let fetchSpotifyDaylist = async () => {
             json: true,
         };
 
-        ({ spotify_daylist } = await axios(queryPlaylistToRefresh));
+        ({ data } = await axios(queryPlaylistToRefresh));
 
-        while (spotify_daylist.tracks === undefined) {
+        spotify_daylist = data;
+        while (spotify_daylist.name === "daylist") {
             console.log(
                 `${timestamp()} Need to poke daylist to force update, querying...`
             );
 
-            ({ spotify_daylist } = await axios(queryPlaylistToRefresh));
+            ({ data } = await axios(queryPlaylistToRefresh));
+            spotify_daylist = data;
         }
     }
 
